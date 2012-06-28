@@ -1,0 +1,214 @@
+#    Instructions to set-up, compile and run GOLD test cases on an SGI.
+#  This example has a static memory coupled model CM2G, GOLD_SIS and dynamic
+#  solo-models side-by-side.  As parts of the CM2G coupled model are not yet
+#  publicly available, CM2G is commented out in this example.
+
+#  This is example has the GOLD and shared code, as well as GOLD_SIS_extras and
+# CM2G_extras directories containing additional source necessary for building
+# GOLD_SIS and CM2G.  Other examples for code configuration are available
+# on the GOLD wiki page, available internally at GFDL at
+#   http://cobweb.gfdl.noaa.gov/~aja/GOLD/
+
+# Cut and paste the following on in a tty on an ic (HPCS) machine: 
+
+# Move to whatever working directory you want to use.
+cd $FTMPDIR
+
+# Check out the relevant GOLD code.
+cvs co -r GOLD_ogrp GOLD
+cvs co -r perth bin2 shared templates 
+cvs co -r perth -d GOLD_SIS_extras atmos_null atmos_param/astronomy \
+  atmos_param/diag_integral atmos_param/monin_obukhov coupler ice_param ice_sis land_null
+
+cvs co -r perth postprocessing/mppnccombine.c 
+
+# To create a tar-ball at this point, do
+#   tar -cf GOLD.tar .
+# If working from a tar-ball, instead of the above, use at this point.
+#   tar -xf GOLD.tar
+
+# Compile mppnccombine, which combines multi-PE output
+if (! -e postprocessing/mppnccombine) then
+  gcc -O2 postprocessing/mppnccombine.c -o postprocessing/mppnccombine \
+        -lnetcdf -lm -I/usr/local/include -L/usr/local/lib
+endif
+alias mppnccombine `pwd`/postprocessing/mppnccombine
+
+# This allows the model to be compiled on different machines.
+set build = Build_`uname -m`
+mkdir -p $build/GOLD_SIS $build/solo $build/shared
+
+cd $build/shared
+rm path_names || :
+../../bin/list_paths ../../shared
+mv path_names pt_orig
+egrep -v "atmos_ocean_fluxes|coupler_types|coupler_util" pt_orig > path_names
+../../bin/mkmf -t ../../templates/mkmf.template.ia64_flt -p libfms.a -c "-Duse_libMPI -Duse_netCDF -Duse_SGI_GSM" path_names
+make -j libfms.a
+cd ../..
+
+cd $build/solo
+ln -sf ../shared/*.{o,mod} .
+rm path_names || :
+../../bin/list_paths ../../GOLD/config_src/dynamic ../../GOLD/config_src/solo_driver ../../GOLD/src ../../shared
+../../bin/mkmf -t ../../templates/mkmf.template.ia64_flt -p GOLD -c "-Duse_libMPI -Duse_netCDF -Duse_SGI_GSM" path_names
+make -j
+cd ../..
+
+cd $build/GOLD_SIS
+ln -sf ../shared/*.{o,mod} .
+rm path_names || :
+../../bin/list_paths ../../GOLD/{examples/GOLD_SIS,config_src/coupled_driver,src} ../../shared ../../GOLD_SIS_extras/*
+../../bin/mkmf -t ../../templates/mkmf.template.ia64_flt -p GOLD -c "-Duse_libMPI -Duse_netCDF -Duse_SGI_GSM" path_names
+make -j
+cd ../..
+
+
+# To compile a debugger-friendly version of the model, change 'unset' to 'set'.
+unset make_debug
+if ($?make_debug) then
+  set debug_dir = Debug_`uname -m`
+  mkdir -p $debug_dir/GOLD_SIS $debug_dir/solo $debug_dir/shared
+
+  cd $debug_dir/shared
+  rm path_names; ../../bin/list_paths ../../shared
+  mv path_names pt_orig
+  egrep -v "atmos_ocean_fluxes|coupler_types|coupler_util" pt_orig > path_names
+  ../../bin/mkmf -t ../../templates/mkmf.debugtemplate.ia64 -p libfms.a -c "-Duse_libMPI -Duse_netCDF -Duse_SGI_GSM" path_names
+  make -j libfms.a
+  cd ../..
+
+  cd $debug_dir/solo
+  ln -sf ../shared/*.{o,mod} .
+# Could use instead  ln -sf ../../$build/shared/*.{o,mod} . 
+  rm path_names
+  ../../bin/list_paths ../../GOLD/config_src/dynamic ../../GOLD/config_src/solo_driver ../../GOLD/src ../../shared
+  ../../bin/mkmf -t ../../templates/mkmf.debugtemplate.ia64 -p GOLD -c "-Duse_libMPI -Duse_netCDF -Duse_SGI_GSM" path_names
+  make -j
+  cd ../..
+
+  cd $debug_dir/GOLD_SIS
+  ln -sf ../shared/*.{o,mod} .
+# Could use instead  ln -sf ../../$build/shared/*.{o,mod} .
+  rm path_names
+  ../../bin/list_paths ../../GOLD/{examples/GOLD_SIS,config_src/coupled_driver,src} ../../shared ../../GOLD_SIS_extras/*
+  ../../bin/mkmf -t ../../templates/mkmf.debugtemplate.ia64 -p GOLD -c "-Duse_libMPI -Duse_netCDF -Duse_SGI_GSM" path_names
+  make -j
+  cd ../..
+
+endif
+
+# Uncomment the following to also build the full CM2G coupled model.
+# cvs co -r perth -d CM2G_extras atmos_coupled atmos_fv_dynamics atmos_param atmos_shared coupler ice_param ice_sis land_lad land_param 
+# rm -rf CM2G_extras/atmos_fv_dynamics/driver/solo
+# mkdir -p $build/CM2G
+# cd $build/CM2G
+# ln -sf ../shared/*.{o,mod} .
+# rm path_names
+# ../../bin/list_paths ../../GOLD/{examples/CM2.2,config_src/coupled_driver,src} ../../CM2G_extras/* ../../CM2G_extras/ice_sis/ ../../shared
+# ../../bin/mkmf -t ../../templates/mkmf.template.ia64_flt -p GOLD -c "-Duse_libMPI -Duse_netCDF -DSPMD -Duse_shared_pointers -Duse_SGI_GSM -DLAND_BND_TRACERS" path_names
+# make -j
+# cd ../..
+
+echo Done with build phase.
+
+# To run double_gyre:
+cd GOLD/examples/double_gyre
+mkdir -p RESTART
+mpirun -np 8 ../../../$build/solo/GOLD
+foreach file ( `ls -1 *.nc.0000` )
+  mppnccombine -r $file
+end
+cd ../../..
+
+# To run DOME:
+cd GOLD/examples/DOME
+mkdir -p RESTART
+mpirun -np 6 ../../../$build/solo/GOLD
+foreach file ( `ls -1 *.nc.0000` )
+  mppnccombine -r $file
+end
+cd ../../..
+
+# To run global:
+cd GOLD/examples/global
+mkdir -p INPUT
+# In a non-GFDL setup, the following explicit path will have to be altered.
+(cd INPUT; ln -sf /archive/gold/datasets/global/perth/INPUT/* .)
+mkdir -p RESTART
+mpirun -np 36 ../../../$build/solo/GOLD
+foreach file ( `ls -1 *.nc.0000` )
+  mppnccombine -r $file
+end
+cd ../../..
+
+# To run GOLD_SIS:
+cd GOLD/examples/GOLD_SIS
+mkdir -p INPUT
+# In a non-GFDL setup, the following explicit path will have to be altered.
+(cd INPUT; ln -sf /archive/gold/datasets/GOLD_SIS/perth/INPUT/* .)
+mkdir -p RESTART; rm -f *.nc* RESTART/*
+mpirun -np 30 ../../../$build/GOLD_SIS/GOLD
+foreach file ( `ls -1 *.nc.0000` )
+  mppnccombine -r $file
+end
+cd ../../..
+
+# To run CM2G:
+# cd GOLD/examples/CM2.2
+# mkdir INPUT RESTART
+# In a non-GFDL setup, the following explicit paths will have to be altered.
+# (cd INPUT; ln -s /archive/gold/datasets/CM2.2/perth/INPUT/* .;ln -s grid_spec_fv_v4.nc grid_spec.nc)
+# (cd INPUT; cpio -iv < /archive/gold/datasets/CM2.2/perth/RESTART/CM2G.initCond.cpio)
+# mpirun -np 120 ../../$build/CM2G/GOLD
+
+
+echo "Done with example"
+
+
+The resulting directory structure for this example is diagrammed below.
+The top level directory, in this example ., is the top of your work space.
+
+.
+|-- CM2G_extras
+|   |-- atmos_coupled
+|   |   ...
+|   `-- land_param
+|-- GOLD
+|   |-- config_src
+|   |   |-- coupled_driver
+|   |   |-- dynamic
+|   |   `-- solo_driver
+|   |-- examples
+|   |   |-- CM2.2
+|   |   |-- DOME
+|   |   |-- GOLD_SIS
+|   |   |-- benchmark
+|   |   |-- double_gyre
+|   |   `-- global
+|   `-- src
+|       |-- core
+|       |-- diagnostics
+|       |-- equation_of_state
+|       |-- framework
+|       |-- initialization
+|       |-- parameterizations
+|       |   |-- lateral
+|       |   `-- vertical
+|       |-- tracer
+|       `-- user
+|-- GOLD_SIS_extras
+|   |-- atmos_null
+|   |-- atmos_param
+|   |-- coupler
+|   |-- ice_param
+|   |-- ice_sis
+|   `-- land_null
+|-- bin
+|-- $build
+|   |-- CM2G
+|   |-- GOLD_SIS
+|   |-- shared
+|   `-- solo
+|-- shared
+`-- templates

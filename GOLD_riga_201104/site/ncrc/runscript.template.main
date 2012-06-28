@@ -1,0 +1,1190 @@
+#!/bin/csh -f
+#FRE scheduler-options
+# 
+# $Id: runscript.template.main,v 1.1.4.13 2010/10/11 19:19:00 afy Exp $
+# ------------------------------------------------------------------------------
+# FMS/FRE Project: Runscript Template - NCRC Version
+# ------------------------------------------------------------------------------
+# arl    Ver   1.00  Copied from the NCCS version                   July 10
+# arl    Ver   1.01  Unset/set echo around platform csh             July 10
+# arl    Ver   1.02  Modify alias 'mppnccombine'                    July 10
+# arl    Ver   1.03  Modify alias 'combine_parallel'                July 10
+# arl    Ver   1.04  Remove all the saving to the HPSS              July 10
+# arl    Ver   1.05  Remove sending ascii/restarts to the GFDL      July 10
+# arl    Ver   1.06  Replace history combining by online one        July 10
+# arl -------------- Branch 1.1.2 --------------------------------- July 10
+# arl    Ver   1.00  Fix hsmSiteDir variable                        July 10
+# arl    Ver   2.00  Modify LFS striping settings                   August 10
+# arl    Ver   3.00  Modify alias 'combine_parallel' (use siteDir)  August 10
+# arl    Ver   3.01  Fix LFS striping settings                      August 10
+# arl    Ver   3.02  Add staged history combining                   August 10
+# afy -------------- Branch 1.1.4 --------------------------------- August 10
+# afy    Ver   1.00  Cosmetics                                      August 10
+# afy    Ver   1.01  Fix check for 'fre-transfer' module            August 10
+# afy    Ver   1.02  Fix check for 'fre-nctools' module             August 10
+# afy    Ver   1.03  Revive sending ascii/restarts to the GFDL      August 10
+# afy    Ver   2.00  Balance 'set echo'/'unset echo'                August 10
+# afy    Ver   2.01  Make online combining similar to the GFDL one  August 10
+# afy    Ver   2.02  Modify alias 'send_file'                       August 10
+# afy    Ver   2.03  Rename alias 'qsub' => 'submit'                August 10
+# afy    Ver   2.04  Modify alias 'submit' (add option -V)          August 10
+# afy    Ver   2.05  Modify call to 'combine*' (add 'stdout')       August 10
+# afy    Ver   2.06  Add alias 'tar'                                August 10
+# afy    Ver   3.00  Add flagOutputCheck settable constant          August 10
+# afy    Ver   3.01  Add constant 'patternSedRestartProduction'     August 10
+# afy    Ver   3.02  Add constant 'patternSedRestartRegression'     August 10
+# afy    Ver   3.03  Add restart archives checking                  August 10
+# afy    Ver   3.04  New pragmas for flags/constants/variables      August 10
+# afy    Ver   3.05  Merge flagTransfer* settable constants         August 10
+# afy    Ver   3.06  Fix ascii/restart directories creation         August 10
+# afy    Ver   3.07  Fix multi-segment restarts/history creation    August 10
+# afy    Ver   3.08  Remove combineList variable                    August 10
+# afy    Ver   4.00  Rename combine_parallel.csh => fresavehist     August 10
+# afy    Ver   5.00  Fix a problem with flagOutputTransfer          August 10
+# afy    Ver   5.01  Cosmetics in the output stager call            August 10
+# afy    Ver   6.00  Add refine diagnostics scripts processing      August 10
+# afy    Ver   6.01  Cosmetics in file sender calls                 August 10
+# afy    Ver   6.02  Revive combineList variable                    August 10
+# afy    Ver   6.03  Modify region files combining (use children)   August 10
+# afy    Ver   6.04  Modify online combining (exit, send, frepp)    August 10
+# afy    Ver   6.05  Modify staged combining (check, frepp)         August 10
+# afy    Ver   6.06  Add offline/bySegment combining (stub for now) August 10
+# afy    Ver   7.00  Fix constant 'patternSedRestartProduction'     August 10
+# afy    Ver   7.01  Fix constant 'patternSedRestartRegression'     August 10
+# afy    Ver   7.02  Add alias 'ardiff'                             August 10
+# afy    Ver   7.03  Unique filenames to avoid partial comparison   August 10
+# afy    Ver   7.04  Add alias 'unique'                             August 10
+# afy    Ver   7.05  Modify restarts checking (add polling/delay)   August 10
+# afy    Ver   7.06  Fix staged combining (frepp condition)         August 10
+# afy    Ver   7.07  Fix output stager calls (frepp parameter)      August 10
+# afy    Ver   8.00  Modify alias 'submit' (use msub!)              September 10
+# afy    Ver   8.01  Add alias 'submitFileSender'                   September 10
+# afy    Ver   9.00  Add a check for the PBS_O_WORKDIR presence     September 10
+# afy    Ver   9.01  Remove all the references to the PBS_QUEUE     September 10
+# afy    Ver   9.02  Add default PBS_JOBNAME, adjust it later       September 10
+# afy    Ver   9.03  Modify alias 'submitFileSender' (use qsub!)    September 10
+# afy    Ver  10.00  Modify alias 'submitFileSender' (msub -q ldtn) September 10
+# afy    Ver  11.00  Modify alias 'submitFileSender' (gaea!, size)  September 10
+# afy    Ver  11.01  Add alias 'submitOutputStager'                 September 10
+# afy    Ver  12.00  Add constants 'fileSender(Partition|Queue)'    October 10
+# afy    Ver  12.01  Modify alias 'submitFileSender' (use ^)        October 10
+# afy    Ver  12.02  Add constants 'outputStager(Partition|Queue)'  October 10
+# afy    Ver  12.03  Modify alias 'submitOutputStager' (use ^)      October 10
+# afy    Ver  13.00  Modify 'npes' type (const => var)              October 10
+# afy    Ver  13.01  Add settable constants 'outputStager*'         October 10
+# afy    Ver  13.02  Add settable constants 'fileSender*'           October 10
+# afy    Ver  13.03  Don't adjust 'ptmpDir' from FRE_INPUT_DIR      October 10
+# afy    Ver  13.04  Add branch for FRE_STAGE == CHAIN              October 10
+# afy    Ver  13.05  Add alias 'frepp'                              October 10
+# afy    Ver  13.06  Modify alias 'submit' (remove option -V)       October 10
+# afy    Ver  13.07  Use shortened PBS_JOBID in filenames           October 10
+# ------------------------------------------------------------------------------
+# Copyright (C) NOAA Geophysical Fluid Dynamics Laboratory, 2000-2010
+# Designed and written by V. Balaji, Amy Langenhorst and Aleksey Yakovlev
+# 
+
+#===============================================================================
+#FRE version-info
+#===============================================================================
+
+  echo "Starting on `date`"
+  echo $HOST $HOSTNAME
+  set echo
+  unalias *
+
+  if ( $?PBS_ENVIRONMENT ) then
+    if ( $PBS_ENVIRONMENT == 'PBS_BATCH' ) then
+      if ( $?PBS_O_WORKDIR ) then
+        chmod 644 $PBS_O_WORKDIR/$PBS_JOBID.OU
+      endif
+    endif 
+  else
+    set -r PBS_JOBID = '000000'
+    set -r PBS_JOBNAME = 'STDIN'
+  endif
+
+################################################################################
+#---------------- global constants and variables, set by frerun ----------------
+################################################################################
+
+  #FRE const(name)
+  #FRE const(rtsxml)
+  #FRE const(freCommandsHomeDir)
+  #FRE const(stdoutDir)
+  #FRE const(workDir)
+  #FRE const(archiveDir)
+  #FRE const(scriptName)
+  #FRE const(ppRefineDiagScriptNames)
+  #FRE const(executable)
+  #FRE const(segmentsPerSimulation)
+  #FRE const(segmentsPerJob)
+  #FRE const(jobsPerSimulation)
+  #FRE const(combineFreq)
+  #FRE const(monthslist)
+  #FRE const(dayslist)
+  #FRE const(timeStampFormat)
+  #FRE const(baseDate)
+
+  #FRE const(outputStagerPartition)
+  #FRE const(outputStagerQueue)
+  #FRE const(fileSenderPartition)
+  #FRE const(fileSenderQueue)
+
+  #FRE flag(flagRunType)
+  #FRE flag(flagOutputType)
+  #FRE flag(flagOutputFormat)
+  #FRE flag(flagOutputCombineType)
+  #FRE flag(flagOutputCombine)
+  #FRE flag(flagOutputArchive)
+  #FRE flag(flagOutputPostProcess)
+  #FRE flag(flagOutputTransfer)
+  #FRE flag(flagOutputCheck)
+
+  #FRE var(npes)
+  #FRE var(ptmpDir)
+  #FRE var(outputDir)
+  #FRE var(gridSpec)
+  #FRE var(initCond)
+
+################################################################################
+#------------------------ global environment settings --------------------------
+################################################################################
+
+  # ---------------- FRE environment variables, which have to be set after the platform csh:
+
+  # FRE_TRANSFER_HOME	- root of the fre-transfer module
+  # FRE_NCTOOLS_HOME	- toot of the fre-nctools module
+
+  # ---------------- FRE scripts/executables, which have to be accessible via the PATH after the platform csh:
+
+  # ardiff		- part of the fre-commands module
+  # combine-ncc		- part of the fre-nctools module
+  # hsmget		- part of the fre-transfer module 
+  # mppnccombine	- part of the fre-nctools module
+  # prepare_dir.csh	- part of the fre-commands module
+  # send_file		- part of the fre-transfer module
+  # time_stamp.csh	- part of the fre-commands module
+
+  # ---------------- initialize environment modules
+
+  unset echo
+  source $MODULESHOME/init/tcsh
+  set echo
+
+  # ---------------- commands, copied from XML (setup/platform/csh)
+
+  unset echo
+  #FRE setup-platform-csh
+  set echo
+
+  # ---------------- exit if no fre-transfer module is loaded
+
+  if ( ! $?FRE_TRANSFER_HOME ) then
+    unset echo
+    echo "ERROR: The script '$scriptName' must load a 'fre-transfer' module"
+    set echo
+    exit 1
+  endif
+
+  # ---------------- exit if no fre-nctools module is loaded
+
+  if ( ! $?FRE_NCTOOLS_HOME ) then
+    unset echo
+    echo "ERROR: The script '$scriptName' must load a 'fre-nctools' module"
+    set echo
+    exit 1
+  endif
+
+  # ---------------- the settings below aren't changeable (FREROOT is for compatibility only)
+
+  setenv FRE_COMMANDS_HOME $freCommandsHomeDir
+  setenv PATH $FRE_COMMANDS_HOME/bin:$PATH
+  setenv FREROOT $FRE_COMMANDS_HOME
+
+  # ---------------- adjust the job name for interactive runs 
+
+  if ( $PBS_JOBNAME == 'STDIN' ) then
+    setenv PBS_JOBNAME $name
+  endif
+
+################################################################################
+#------------------------ global constants and aliases -------------------------
+################################################################################
+
+  set -r beginruntime = `date "+%s"`
+  set -r outputPath = `echo $outputDir | perl -pe "s/.*?$USER\///"`
+  set -r jobId = `echo $PBS_JOBID | sed -r 's/^([0-9]+).*$/o\1/'`
+
+  # ---------------- options for the FRE file sender
+  set -r fileSenderTimeAscii   = 00:01:00
+  set -r fileSenderTimeRestart = 00:30:00
+  set -r fileSenderTimeHistory = 01:00:00
+
+  # ---------------- for compatibility only
+  set -r work = $workDir
+
+  # ---------------- HSM site-dependent directory
+  set -r hsmSiteDir = $FRE_TRANSFER_HOME/site/ncrc
+
+  # ---------------- top directory for all the HSM-copied files
+  set -r hsmDir = $workDir/hsm
+
+  # ---------------- selection patterns for grep
+  set -r patternGrepTail = '\.[0-9]{4}$'
+  set -r patternGrepAscii = '\<out\>|\<results\>'
+  set -r patternGrepRestartsOrNC = '\<res\>|\<nc\>'
+  set -r patternGrepRegion = '^rregion'
+  set -r patternGrepNC = '\<nc\>'
+
+  # ---------------- matching patterns for find
+  set -r patternFindRestarts = '.*\<res\>.*'
+  set -r patternFindNC = '.*\<nc\>.*'
+
+  # ---------------- replacement patterns for sed
+  set -r patternSedRestartProduction = 's/\/[0-9]+(\/restart\/[0-9]+\.tar)$/\1/'
+  set -r patternSedRestartRegression = 's/pe[0-9]+(\/restart\/[0-9]+\.tar)$/pe\1/'
+
+  # ---------------- FRE string date generation for file name labels
+  alias timeStamp `which time_stamp.csh` -f $timeStampFormat
+
+  # ---------------- FRE directory making/cleaning utility
+  alias prepareDir `which prepare_dir.csh`
+
+  # ---------------- FRE archives comparing utility
+  alias ardiff `which ardiff`
+
+  # ---------------- FRE postprocessing utility
+  alias frepp frepp -v -c split -s
+
+  # ---------------- FRE data copying between work directory and archive directory via ptmp directory
+  alias hsmget `which hsmget` -q -t -m $hsmSiteDir/hsmget.mk -w $hsmDir -p '$ptmpDir' -a /
+
+  # ---------------- FRE script for sending files to GFDL
+  alias fileSender `which send_file`
+
+  # ---------------- FRE netCDF files combining utilities
+  alias mppnccombine `which mppnccombine` -64
+  alias slmnccombine `which combine-ncc` 
+
+  # ---------------- FRE output stager 
+  alias outputStager $freCommandsHomeDir/site/ncrc/fresavehist
+
+  # ---------------- batch scheduler submit commands
+  alias submit `which msub`
+  alias submitFileSender `which msub` -l size=1,partition=$fileSenderPartition -q $fileSenderQueue -V
+  alias submitOutputStager `which msub` -l size=1,walltime=4:00:00,partition=$outputStagerPartition -q $outputStagerQueue -V
+
+  # ---------------- archiving command
+  alias tar `which tar` -b 1024
+
+  # ---------------- unique timestamp
+  alias unique 'date +%s.$$'
+
+################################################################################
+#------------------------------ environment checks -----------------------------
+################################################################################
+
+  # ---------------- some global configuration
+
+  limit stacksize unlimited
+  limit coredumpsize unlimited
+  limit
+      
+  # ---------------- exit if not running on Cray XT*
+
+  set machine = `uname -m`
+
+  if ( $machine != 'x86_64' ) then
+    unset echo
+    echo "ERROR: The script '$scriptName' is intended for platform x86_64"
+    set echo
+    exit 1
+  endif
+
+  unset machine
+
+  # ---------------- exit if number of days/months/hours is not equal to number of segments per job
+
+  if ( $#dayslist != $segmentsPerJob || $#monthslist != $segmentsPerJob) then
+    unset echo
+    echo "ERROR: dayslist and monthslist must be equal to a number of segments per job"
+    set echo
+    exit 1
+  endif
+
+  if ( $?hourslist ) then
+    if ( $#hourslist != $segmentsPerJob ) then
+      unset echo
+      echo "ERROR: hourslist must be equal to a number of segments per job"
+      set echo
+      exit 1
+    endif
+  endif
+
+################################################################################
+#----------------------------- global variables --------------------------------
+################################################################################
+
+  if ( $?FRE_PROJECT ) then  
+    set project = $FRE_PROJECT
+  else
+    set project = ""
+  endif
+
+  set combineList = ( )
+
+  @ ireload = 1
+  @ irun = 1
+
+################################################################################
+#--------------------------- before the main loop ------------------------------
+################################################################################
+
+  # ---------------- print the script parameters
+
+  unset echo 
+  echo $name
+  echo ${npes}pe_${segmentsPerJob}run
+  set echo
+
+  # ---------------- commands, copied from XML (experiment/runtime/csh)
+
+  #FRE experiment-runtime-csh
+
+  # ---------------- initialize reloading (production runs only)
+
+  if ( $?flagRunTypeProduction ) then
+
+    set reload_file = $outputDir/ascii/reload_commands
+
+    if ( -f $reload_file ) then
+      if ( -r $reload_file ) then
+	source $reload_file
+      else
+	unset echo
+	echo "ERROR: reload file is not readable: $reload_file"
+        set echo
+	exit 1
+      endif
+    endif
+
+    @ currentSeg = ( $ireload - 1 ) * $segmentsPerJob + $irun
+
+  endif
+
+  # ---------------- set up working directory structure
+
+  prepareDir $workDir		|| exit 1
+  prepareDir $workDir/INPUT	|| exit 1
+  prepareDir $workDir/RESTART	|| exit 1
+
+  lfs setstripe $workDir/INPUT   -s 1048576 -c 0 -i -1
+  lfs setstripe $workDir/RESTART -s 1048576 -c 0 -i -1
+
+  # ---------------- input data loading
+
+  cd $workDir
+
+  set dataFilesNotOK = ()
+
+#dataFiles_from_xml
+
+  if ( $#dataFilesNotOK > 0) then
+    unset echo
+    foreach dataFile ( $dataFilesNotOK )
+      echo "A problem with the data file: $dataFile"
+    end
+    echo "ERROR: Failed to copy data files"
+    set echo
+    exit 1
+  endif
+
+  @ gridSpecStatus = 0
+
+  if ( ( $gridSpec:e == 'cpio' || $gridSpec:e == 'tar' ) && $gridSpec:r:e == 'nc' ) then
+    hsmget $gridSpec:r:r:s+/++/\* && \
+    find $hsmDir$gridSpec:r:r -maxdepth 1 -type f -exec ln -f -t $workDir/INPUT/ {} \;
+    @ gridSpecStatus = $status
+  else if ( ( $gridSpec:e == 'cpio' || $gridSpec:e == 'tar' ) && $gridSpec:r:e != 'nc' ) then
+    hsmget $gridSpec:r:s+/++/\* && \
+    find $hsmDir$gridSpec:r -maxdepth 1 -type f -exec ln -f -t $workDir/INPUT/ {} \;
+    @ gridSpecStatus = $status
+  else if ( $gridSpec != "" && -d "$gridSpec" ) then
+    hsmget $gridSpec:s+/++/\* && \
+    find $hsmDir$gridSpec -maxdepth 1 -type f -exec ln -f -t $workDir/INPUT/ {} \;
+    @ gridSpecStatus = $status
+  else if ( $gridSpec != "" && -f "$gridSpec" ) then
+    hsmget $gridSpec:s+/++ && \
+    ln -f $hsmDir/$gridSpec:s+/++ $workDir/INPUT/grid_spec.nc
+    @ gridSpecStatus = $status
+  endif
+
+  if ( $gridSpecStatus ) then
+    unset echo
+    echo "ERROR: Failed to copy grid specification"
+    set echo
+    exit 1
+  endif
+
+  unset gridSpecStatus 
+
+  @ initCondStatus = 0 
+
+  if ( ( $initCond:e == 'cpio' || $initCond:e == 'tar' ) && $initCond:r:e == 'nc' ) then
+    hsmget $initCond:r:r:s+/++/\* && \
+    find $hsmDir$initCond:r:r -maxdepth 1 -type f -exec ln -f -t $workDir/INPUT/ {} \;
+    @ initCondStatus = $status
+  else if ( ( $initCond:e == 'cpio' || $initCond:e == 'tar' ) && $initCond:r:e != 'nc' ) then
+    hsmget $initCond:r:s+/++/\* && \
+    find $hsmDir$initCond:r -maxdepth 1 -type f -exec ln -f -t $workDir/INPUT/ {} \;
+    @ initCondStatus = $status
+  else if ( $initCond != "" && -d "$initCond" ) then
+    hsmget $initCond:s+/++/\* && \
+    find $hsmDir$initCond -maxdepth 1 -type f -exec ln -f -t $workDir/INPUT/ {} \;
+    @ initCondStatus = $status
+  else if ( $initCond != "" && -f "$initCond" ) then
+    hsmget $initCond:s+/++ && \
+    ln -f $hsmDir/$initCond:s+/++ $workDir/INPUT/.
+    @ initCondStatus = $status
+  endif
+
+  if ( $initCondStatus ) then
+    unset echo
+    echo "ERROR: Failed to copy initial conditions"
+    set echo
+    exit 1
+  endif
+
+  unset initCondStatus 
+
+  # ---------------- commands, copied from XML (experiment/input/csh[not(@type="always") and not(@type="postInit")])
+
+  #FRE experiment-input-csh-init
+
+  cd $workDir
+
+  # ---------------- list files in the INPUT directory
+
+  unset echo
+  ls -l INPUT/*
+  set echo
+
+  # ---------------- normal exit if in the input data staging mode
+
+  if ( $?FRE_STAGE ) then
+    if ( $FRE_STAGE == 'INPUT' ) then
+      unset echo
+      echo end_of_input
+      echo "NOTE: Natural end-of-input for $scriptName."
+      set echo
+      exit 0
+    else if ( $FRE_STAGE == 'CHAIN' ) then
+      pushd $stdoutDir
+      if ( "$project" != "" ) then
+        submit -A $project -v FRE_PROJECT=$project $scriptName
+      else
+        submit $scriptName
+      endif
+      popd
+      unset echo
+      echo end_of_chaining
+      echo "NOTE: Natural end-of-chaining for $scriptName."
+      set echo
+      exit 0
+    endif
+  endif 
+
+  # ---------------- executable and tables loading
+
+  cp -p $executable $executable:t
+
+#diagTable_from_xml
+#fieldTable_from_xml
+
+  touch data_table
+
+#dataTable_from_xml
+#tracerTreeTable_from_xml
+#tracerTreeInit_from_xml
+
+  # ---------------- check and prepare refine diagnostics scripts
+
+  if ( $?flagOutputCombineTypeStaged || $?flagOutputCombineTypeBySegment ) then
+
+    if ( $#ppRefineDiagScriptNames > 0 ) then
+
+      set ppRefineDiagScriptNamesList = ""
+      set ppRefineDiagScriptNamesNotOK = ()
+
+      foreach ppRefineDiagScriptName ( $ppRefineDiagScriptNames )
+	if ( -f $ppRefineDiagScriptName && -r $ppRefineDiagScriptName ) then
+          if ( $ppRefineDiagScriptNamesList == "" ) then
+            set ppRefineDiagScriptNamesList = $ppRefineDiagScriptName
+          else
+            set ppRefineDiagScriptNamesList = $ppRefineDiagScriptNamesList,$ppRefineDiagScriptName
+          endif
+	else
+          set ppRefineDiagScriptNamesNotOK = ( $ppRefineDiagScriptNamesNotOK $ppRefineDiagScriptName)
+	endif
+      end
+
+      if ( $#ppRefineDiagScriptNamesNotOK > 0 ) then
+	unset echo
+	foreach ppRefineDiagScriptName ( $ppRefineDiagScriptNamesNotOK )
+          echo "A problem with the refine diagnostics script: $ppRefineDiagScriptName"
+	end
+	echo "ERROR: Failed to access refine diagnostics scripts"
+        set echo
+	exit 1
+      endif
+
+    endif
+
+  endif
+
+################################################################################
+#------------------------------- the main loop ---------------------------------
+################################################################################
+
+  while ( $irun <= $segmentsPerJob )
+
+    # ---------------- commands, copied from XML (experiment/input/csh[@type="always" or @type="postInit"])
+
+    #FRE experiment-input-csh-always-or-postinit
+
+    cd $workDir
+
+    # ---------------- set timing parameters
+
+    set months = $monthslist[$irun]
+    set days = $dayslist[$irun]
+
+    # ---------------- include namelists from XML
+
+#namelists_from_xml
+
+    # ---------------- print run parameters
+
+    unset echo
+    echo loop_$irun/$segmentsPerJob
+    echo run
+    set echo
+
+    # ---------------- prepare MPI call, execute it, analyze results
+
+    aprun -n $npes ./$executable:t |& tee fms.out
+
+    if ( $status ) then
+      @ cores_dumped = 0
+      if ( ! $?MPI_COREDUMP_DEBUGGER ) setenv MPI_COREDUMP_DEBUGGER 'gdb -batch'
+      echo where > .gdbinit
+      foreach corefile ( `ls core*` )
+        echo "dump of core file $corefile" > $corefile.out
+        $MPI_COREDUMP_DEBUGGER $executable:t $corefile >> $corefile.out &
+        @ cores_dumped++
+      end
+      unset echo
+      wait
+      set MPI_FAIL
+      set outputDir = ${outputDir}_crash
+      prepareDir $outputDir/ascii || exit 1
+      if ( $cores_dumped > 0 ) then
+        cat core*.out >> fms.out
+        cat core*.out
+        echo "ERROR: in mpirun, core dumped: run $ireload, loop $irun" 
+      else
+        set cdsize = `limit coredumpsize`
+        echo "ERROR: in mpirun, no cores produced: run $ireload, loop $irun"
+        echo "NOTE: You are using $cdsize"
+      endif
+      set echo
+    endif
+
+    # ---------------- generate date for file names
+
+    set begindate = `timeStamp -b`
+    if ( $begindate == 'no_time_stamp' ) set begindate = tmp`date '+%j%H%M%S'`
+    set enddate = `timeStamp -e`
+    if ( $enddate == 'no_time_stamp' ) set enddate = tmp`date '+%j%H%M%S'`
+    set fyear = `echo $enddate | cut -c -4`
+
+    # ---------------- commands, copied from XML (experiment/postProcess/csh)
+
+    #FRE experiment-postprocess-csh
+
+    cd $workDir
+
+    # ---------------- remove time_stamp.out file
+
+    if ( -f time_stamp.out ) rm -f time_stamp.out
+
+    # ---------------- save ascii files
+
+    set asciiFiles = ( `ls -1 | egrep "$patternGrepAscii"` )
+
+    if ( $#asciiFiles > 0 ) then
+
+      set asciiArchive = $outputDir/ascii/$begindate.ascii_out.tar
+
+      if ( ! -e $asciiArchive:h ) then
+        prepareDir $asciiArchive:h || exit 1
+      endif
+
+      foreach file ( $asciiFiles )
+	mv $file $begindate.$file
+      end
+
+      set asciiArchiveUnique = $asciiArchive.`unique`
+      ls -1 | egrep "$patternGrepAscii" | tar -cf $asciiArchiveUnique --files-from - --remove-files
+      mv -f $asciiArchiveUnique $asciiArchive
+      unset asciiArchiveUnique
+
+      if ( $?flagOutputTransferOn ) then
+        pushd $stdoutDir
+        set jobName = $scriptName:t.$jobId.file_sender.A.$begindate
+        if ( "$project" != "" ) then
+	  submitFileSender \
+          -A $project \
+          -N $jobName \
+          -o $stdoutDir/ \
+          -l walltime=$fileSenderTimeAscii \
+          -v file=$asciiArchive \
+          `alias fileSender`
+        else
+	  submitFileSender \
+          -N $jobName \
+          -o $stdoutDir/ \
+          -l walltime=$fileSenderTimeAscii \
+          -v file=$asciiArchive \
+          `alias fileSender`
+        endif
+        unset jobName
+        popd
+      endif
+
+      unset asciiArchive
+
+    endif
+
+    # ---------------- save restart files, namelist, tables etc. and move them from RESTART to INPUT
+
+    pushd $workDir/RESTART
+
+    set restartFiles = ( `ls -1 | egrep "$patternGrepRestartsOrNC"` )
+
+    if ( $#restartFiles > 0 ) then
+
+      set restartArchive = $outputDir/restart/$enddate.tar
+
+      if ( ! -e $restartArchive:h ) then
+        prepareDir $restartArchive:h || exit 1
+      endif
+
+      cp -p $workDir/input.nml .
+      cp -p $workDir/*_table .
+      cp -p $rtsxml .
+      cp -p $scriptName .
+
+      set restartArchiveUnique = $restartArchive.`unique`
+      ls -1 | egrep "$patternGrepRestartsOrNC" | tar -cf $restartArchiveUnique --files-from -
+      ls -1 input.nml *_table $rtsxml:t $scriptName:t | tar -rf $restartArchiveUnique --files-from -
+      mv -f $restartArchiveUnique $restartArchive
+      unset restartArchiveUnique
+
+      if ( $irun < $segmentsPerJob ) then
+        find $workDir/INPUT   -maxdepth 1 -type f -regex "$patternFindRestarts" -exec rm {} \;
+        find $workDir/RESTART -maxdepth 1 -type f -regex "$patternFindRestarts" -exec mv -f {} ../INPUT \;
+        find $workDir/RESTART -maxdepth 1 -type f -regex "$patternFindNC" -exec mv -f {} ../INPUT \;
+      endif
+
+      if ( $?flagOutputCheckOn ) then
+
+        if ( -f $restartArchive && -r $restartArchive ) then
+
+          if ( $?flagRunTypeProduction ) then
+            set restartArchiveMain = `echo $restartArchive | sed -r "$patternSedRestartProduction"`
+          else
+            set restartArchiveMain = `echo $restartArchive | sed -r "$patternSedRestartRegression"`
+          endif
+
+          @ retry = 0
+          while ( 1 )
+            if ( -f $restartArchiveMain && -r $restartArchiveMain ) then
+              set restartArchiveMainFound
+              break
+            else if ( $retry < 10 ) then
+              sleep 30
+              @ retry++
+            else
+              unset restartArchiveMainFound
+              break
+            endif
+          end
+          unset retry
+
+          if ( $?restartArchiveMainFound ) then
+            ls -1 $restartArchiveMain $restartArchive | ardiff
+            if ( $status ) then
+              unset echo
+              echo "WARNING: Restart archives '$restartArchiveMain' and '$restartArchive' don't match!"
+              set msg = "Restart archives '$restartArchiveMain' and '$restartArchive' don't match!\n\n"
+	      set msg = "${msg}Job details:\n"
+	      set msg = "${msg}'$name' (run $ireload, loop $irun) running on '$HOST'\n"
+	      set msg = "${msg}Batch job stdout:\n"
+	      set msg = "${msg}$stdoutDir/$PBS_JOBNAME.$jobId"
+              echo $msg | Mail -s "job '$PBS_JOBID' '$name' - restart archives don't match!" $USER
+              unset msg
+              set echo
+            else
+              unset echo
+              echo "NOTE: Restart archives '$restartArchiveMain' and '$restartArchive' match..."
+              set echo
+            endif
+          else
+            unset echo
+            echo "WARNING: The restart archive '$restartArchiveMain' doesn't exist or isn't readable"
+            set echo
+          endif
+
+          unset restartArchiveMainFound
+          unset restartArchiveMain
+
+        else
+          unset echo
+          echo "WARNING: The restart archive '$restartArchive' doesn't exist or isn't readable"
+          set echo
+        endif
+
+      endif
+
+      if ( $?flagOutputTransferOn ) then
+        pushd $stdoutDir
+        set jobName = $scriptName:t.$jobId.file_sender.R.$enddate
+        if ( "$project" != "" ) then
+	  submitFileSender \
+          -A $project \
+          -N $jobName \
+          -o $stdoutDir/ \
+          -l walltime=$fileSenderTimeRestart \
+          -v file=$restartArchive \
+          `alias fileSender`
+        else
+	  submitFileSender \
+          -N $jobName \
+          -o $stdoutDir/ \
+          -l walltime=$fileSenderTimeRestart \
+          -v file=$restartArchive \
+          `alias fileSender`
+        endif
+        unset jobName
+        popd
+      endif
+
+    endif
+
+    popd
+
+    # ---------------- combine region files
+
+    set regionFiles = ( `ls -1 | egrep "$patternGrepRegion.*$patternGrepTail" | sed -r "s/$patternGrepTail//g" | sort -u` )
+
+    if ( $#regionFiles > 0 ) then
+
+      set filesNotOK = ()
+
+      foreach file ( $regionFiles )
+	set inputFiles = ( `ls -1 | egrep "$file$patternGrepTail"` )
+	if ( $#inputFiles > 0 ) then
+          ( mppnccombine $file $inputFiles || set filesNotOK = ( $filesNotOK $file ) ; mv -f $file `echo $file | sed "s/$patternGrepRegion//"` && rm -f $inputFiles ) &
+	endif
+      end
+      wait
+
+      if ( $#filesNotOK > 0) then
+	unset echo
+	foreach file ( $filesNotOK )
+	  echo "A problem during combining the region file: $file"
+	end
+	echo "ERROR: Failed to combine region files"
+	set echo
+	exit 1
+      endif
+
+      unset filesNotOK 
+
+    endif
+
+    # ---------------- combine, save and post-process history files: online
+
+    if ( $?flagOutputCombineTypeOnline ) then
+
+      if ( $?flagOutputCombineOn ) then
+
+	set historyFiles = ( `ls -1 | egrep "$patternGrepNC.*$patternGrepTail" | sed -r "s/$patternGrepTail//g" | sort -u` )
+
+        if ( $#historyFiles > 0 ) then
+
+          set filesNotOK = ()
+
+	  foreach file ( $historyFiles )
+            set inputFiles = ( `ls -1 | egrep "$file$patternGrepTail"` )
+            if ( $#inputFiles > 0) then
+	      ( mppnccombine $file $inputFiles || set filesNotOK = ( $filesNotOK $file ) ; test -s $file && rm -f $inputFiles ) &
+            endif
+	  end
+	  wait
+
+	  if ( $#filesNotOK > 0) then
+	    unset echo
+	    foreach file ( $filesNotOK )
+	      echo "A problem during combining the history file: $file"
+	    end
+	    echo "ERROR: Failed to combine history files"
+	    set echo
+	    exit 1
+	  endif
+
+          unset filesNotOK 
+
+        endif
+
+      endif
+
+      set historyCombinedFiles = ( `ls -1 | egrep "$patternGrepNC"$` )
+
+      if ( $#historyCombinedFiles > 0 ) then
+
+        set historyCombinedArchive = $outputDir/history/$begindate.nc.tar
+
+        if ( ! -e $historyCombinedArchive:h ) then       
+          prepareDir $historyCombinedArchive:h || exit 1
+        endif
+      
+	foreach file ( $historyCombinedFiles )
+	  mv $file $begindate.$file
+	end
+
+        set historyCombinedArchiveUnique = $historyCombinedArchive.`unique`
+        ls -1 | egrep "$patternGrepNC"$ | tar -cf $historyCombinedArchiveUnique --files-from - --remove-files
+        mv -f $historyCombinedArchiveUnique $historyCombinedArchive
+        unset historyCombinedArchiveUnique
+
+	if ( $?flagOutputTransferOn ) then
+          pushd $stdoutDir
+          set jobName = $scriptName:t.$jobId.file_sender.H.$begindate
+          if ( "$project" != "" ) then
+	    submitFileSender \
+            -A $project \
+            -N $jobName \
+            -o $stdoutDir/ \
+            -l walltime=$fileSenderTimeHistory \
+            -v file=$historyCombinedArchive \
+            `alias fileSender`
+          else
+	    submitFileSender \
+            -N $jobName \
+            -o $stdoutDir/ \
+            -l walltime=$fileSenderTimeHistory \
+            -v file=$historyCombinedArchive \
+            `alias fileSender`
+          endif
+          unset jobName
+          popd
+	endif
+
+	set combineList = ( $combineList $historyCombinedArchive:t )
+
+        unset historyCombinedArchive
+
+      endif
+
+      set historyUncombinedFiles = ( `ls -1 | egrep "$patternGrepNC.*$patternGrepTail"` )
+
+      if ( $#historyUncombinedFiles > 0 ) then
+
+	set historyUncombinedArchive = $outputDir/history/$begindate.nc.0000.tar
+
+        if ( ! -e $historyUncombinedArchive:h ) then
+	  prepareDir $historyUncombinedArchive:h || exit 1
+        endif
+
+	foreach file ( $historyUncombinedFiles )
+	  mv $file $begindate.$file
+	end
+
+        set historyUncombinedArchiveUnique = $historyUncombinedArchive.`unique`
+        ls -1 | egrep "$patternGrepNC.*$patternGrepTail" | tar -cf $historyUncombinedArchiveUnique --files-from - --remove-files
+        mv -f $historyUncombinedArchiveUnique $historyUncombinedArchive
+        unset historyUncombinedArchiveUnique
+
+	if ( $?flagOutputTransferOn ) then
+          pushd $stdoutDir
+          set jobName = $scriptName:t.$jobId.file_sender.U.$begindate
+          if ( "$project" != "" ) then
+	    submitFileSender \
+            -A $project \
+            -N $jobName \
+            -o $stdoutDir/ \
+            -l walltime=$fileSenderTimeHistory \
+            -v file=$historyUncombinedArchive \
+            `alias fileSender`
+          else
+	    submitFileSender \
+            -N $jobName \
+            -o $stdoutDir/ \
+            -l walltime=$fileSenderTimeHistory \
+            -v file=$historyUncombinedArchive \
+            `alias fileSender`
+          endif
+          unset jobName
+          popd
+	endif
+
+	set combineList = ( $combineList $historyUncombinedArchive:t )
+
+        unset historyUncombinedArchive
+
+      endif
+      
+      if ( $?flagRunTypeProduction ) then
+	if ( ( $combineFreq > 0 && $#combineList == $combineFreq ) || $currentSeg == $segmentsPerSimulation || $#restartFiles == 0 ) then
+	  if ( $#combineList > 0 ) then
+            set firstdate = `echo $combineList[1] | cut -c -8`
+	  else
+            set firstdate = $begindate
+	  endif
+          if ( $?flagOutputPostProcessOn ) then
+	    echo "`alias frepp` -t $firstdate -d $outputDir/history -x $rtsxml $name"
+          endif
+	  set combineList = ( )
+          unset firstdate
+        endif
+      endif
+
+    endif
+
+    # ---------------- combine, save and post-process history files: offline
+
+    if ( $?flagOutputCombineTypeOffline ) then
+      unset echo
+      echo "ERROR: The offline history combining isn't supported"
+      exit 1
+      set echo
+    endif
+
+    # ---------------- combine, save and post-process history files: staged
+
+    if ( $?flagOutputCombineTypeStaged ) then
+
+      if ( $?flagRunTypeProduction ) then
+	if ( $#combineList + 1 == $combineFreq || $currentSeg == $segmentsPerSimulation || $#restartFiles == 0 ) then
+	  if ( $#combineList > 0 ) then
+            set firstdate = `echo $combineList[1] | cut -c -8`
+	  else
+            set firstdate = $begindate
+	  endif
+          if ( $?ppRefineDiagScriptNamesList ) then
+	    set PPcmd = "`alias frepp` -t $firstdate -D $ppRefineDiagScriptNamesList -d $outputDir/history -x $rtsxml $name"
+          else
+	    set PPcmd = "`alias frepp` -t $firstdate -d $outputDir/history -x $rtsxml $name"
+          endif
+          unset firstdate
+	else
+          set PPcmd = ""
+	endif
+      else
+        set PPcmd = ""
+      endif
+
+      set tempHistoryDateDir = $outputDir/history/$begindate
+
+      prepareDir $tempHistoryDateDir || exit 1
+
+      find $workDir -maxdepth 1 -type f -regex "$patternFindNC" -exec mv -f {} $tempHistoryDateDir \;
+
+      pushd $stdoutDir
+      set jobName = $scriptName:t.$jobId.output_stager.$begindate
+      if ( "$project" != "" ) then
+        submitOutputStager \
+        -A $project \
+        -N $jobName \
+        -o $stdoutDir/ \
+        -v project=$project,datedir=$tempHistoryDateDir,check=$?flagOutputCheck,frepp="$PPcmd",stdout=$stdoutDir/ \
+        `alias outputStager`
+      else
+        submitOutputStager \
+        -N $jobName \
+        -o $stdoutDir/ \
+        -v datedir=$tempHistoryDateDir,check=$?flagOutputCheck,frepp="$PPcmd",stdout=$stdoutDir/ \
+        `alias outputStager`
+      endif
+      unset jobName
+      popd
+
+      if ( "$PPcmd" == "" ) then
+	set combineList = ( $combineList $tempHistoryDateDir:t.tar )
+      else
+	set combineList = ( )
+      endif
+
+    endif
+
+    # ---------------- combine, save and post-process history files: bySegment
+
+    if ( $?flagOutputCombineTypeBySegment ) then
+      unset echo
+      echo "ERROR: The history combining by segment isn't supported"
+      exit 1
+      set echo
+    endif
+
+    # ---------------- terminate script if mpirun crashed
+
+    if ( $?MPI_FAIL ) then
+
+      unset echo
+      echo "ERROR: in mpirun, core dumped: run $ireload, loop $irun"
+      echo "ERROR: Any output that may have been generated "
+      echo "       is in $outputDir"
+
+      sleep 30
+      set echo
+      exit 1
+
+    endif
+
+    # ---------------- terminate script if there are no restart files
+
+    if ( $#restartFiles == 0 ) then
+      unset echo
+      echo "ERROR: no restart files exist, run $ireload, loop $irun"
+      set echo
+      exit 1
+    endif
+
+    # ---------------- increment the loop counter
+
+    @ irun++
+
+    # ---------------- write new reload information (production runs only)
+
+    if ( $?flagRunTypeProduction ) then
+
+      unset echo
+      echo "Writing reload information to $reload_file at `date +%s`"
+      set echo
+
+      if ( -f $reload_file ) then
+	mv -f $reload_file ${reload_file}_prev
+      endif
+
+      if ( $irun <= $segmentsPerJob ) then
+	echo "@ irun          =   $irun"           >  $reload_file
+      else
+	@ ireload++
+	echo "@ irun          =   1"               >  $reload_file
+      endif
+
+      echo   "@ ireload       =   $ireload"        >> $reload_file
+      echo   "set initCond    =   $restartArchive" >> $reload_file
+      echo   "set combineList = ( $combineList )"  >> $reload_file
+      echo   "set fyear       =   $fyear"          >> $reload_file
+
+    endif
+
+    # ---------------- check if simulation complete
+
+    if ( $?flagRunTypeProduction ) then
+      @ currentSeg++
+      if ( $currentSeg > $segmentsPerSimulation ) break
+    endif
+
+  end
+
+################################################################################
+#--------------------------- after the main loop -------------------------------
+################################################################################
+
+  # ---------------- reload and resubmit if needed (production runs only)
+
+  if ( $?flagRunTypeProduction ) then
+
+    if ( $ireload <= $jobsPerSimulation && $currentSeg <= $segmentsPerSimulation ) then
+
+      if ( -f $scriptName ) then
+        pushd $stdoutDir
+        if ( "$project" != "" ) then
+          submit -A $project -v FRE_PROJECT=$project $scriptName
+        else
+          submit $scriptName
+        endif
+        popd
+      else
+	unset echo
+	echo "WARNING: The script '$scriptName' does not exist (run $ireload, loop $irun) - it can't be resubmitted"
+        set echo
+      endif
+
+    endif
+
+  endif
+
+  # ---------------- combine distributed restart files (regression runs only)
+
+  if ( $?flagRunTypeRegression ) then
+
+    prepareDir $workDir/combine_restarts || exit 1
+    pushd $workDir/combine_restarts
+
+    tar -xf $restartArchive
+
+    set restartFiles = ( `ls -1 | egrep "$patternGrepRestartsOrNC.*$patternGrepTail" | sed -r "s/$patternGrepTail//g" | sort -u` )
+
+    foreach file ( $restartFiles )
+      set inputFiles = ( `ls -1 | egrep "$file$patternGrepTail"` )
+      if ( $#inputFiles > 0 ) then
+	set compressed = `ncdump -h $inputFiles[1] | grep 'tile_index:compress' | wc -l`
+	if ( $compressed > 0 ) then
+          slmnccombine $inputFiles $file && rm -f $inputFiles
+          if ( $status ) then
+            unset echo
+            echo "ERROR: in execution of slmnccombine on restarts"
+            set echo
+            exit 1
+          endif
+	else
+          mppnccombine $file $inputFiles && rm -f $inputFiles
+          if ( $status ) then
+            unset echo
+            echo "ERROR: in execution of mppnccombine on restarts"
+            set echo
+            exit 1
+          endif
+	endif
+      endif
+    end
+
+    set restartArchiveUnique = $restartArchive.`unique`
+    ls -1 | tar -cf $restartArchiveUnique --files-from -
+    mv -f $restartArchiveUnique $restartArchive
+    unset restartArchiveUnique
+
+    popd
+
+  endif
+
+  # ---------------- normal end of script 
+
+  rm -rf $workDir
+  unset echo
+  set beforewaittime = `date "+%s"`
+  set ttlnowait = `echo "$beforewaittime - $beginruntime" | bc -l`
+  echo "beginruntime $beginruntime beforewaittime $beforewaittime ttlnowait $ttlnowait"
+  wait
+  set endruntime = `date "+%s"`
+  set ttlruntime = `echo "$endruntime - $beginruntime" | bc -l`
+  echo "beginruntime $beginruntime endruntime $endruntime ttlruntime $ttlruntime"
+
+  echo end_of_run
+  echo "NOTE: Natural end-of-script for $scriptName."
+  exit 0

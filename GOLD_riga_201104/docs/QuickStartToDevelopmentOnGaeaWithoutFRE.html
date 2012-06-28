@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" />
+<title>OMDTwiki | GOLD / Quick Start to Development on Gaea Without FRE </title>
+<link rel='stylesheet' href='parchment.css' type='text/css' />
+<!--HTMLHeader--><style type='text/css'><!--
+  ul, ol, pre, dl, p { margin-top:0px; margin-bottom:0px; }
+  code.escaped { white-space: nowrap; }
+  .vspace { margin-top:1.33em; }
+  .indent { margin-left:40px; }
+  .outdent { margin-left:40px; text-indent:-40px; }
+  a.createlinktext { text-decoration:none; border-bottom:1px dotted gray; }
+  a.createlink { text-decoration:none; position:relative; top:-0.5em;
+    font-weight:bold; font-size:smaller; border-bottom:none; }
+  img { border:0px; }
+  .todo-form { border: none; }
+.todo-form tr td { border: none; font-weight: plain; text-align: left; padding: 4px; }
+.todo-form tr td.heading { text-align: right; width: 130px; padding-right: 6px; }
+.todo-list { border: 2px solid #ccc; }
+.todo-list tr.row1 { background-color: #eee; color: #555; }
+.todo-list tr.row1 td { border-bottom: 2px solid #ccc; }
+.todo-list tr:last-child.row1 td { border-bottom: none; }
+.todo-list th { background-color: #ddd; padding: 3px; font-weight: normal; border: 1px solid #ccc; color: #444; }
+.todo-list tr td { color: #666; }
+.todo-simple-form { border: none; }
+.todo-simple-form tr td { border: none; font-weight: plain; text-align: left; padding: 4px; }
+.todo-simple-form tr td.heading { text-align: right; width: 140px; padding-right: 6px; }
+.todo-simple-list { margin-left: 0px; }
+.todo-simple-list tr td { border: none; padding: 4px 1px; }
+.todo-simple-list tr td.optional-row { color: #999; border: none; padding: 0px 4px 4px 4px; font-size: smaller;}
+.todo-category-text { color: #666; border-bottom: 1px solid #ccc; }
+.todo-description-text { color: #444; }
+.todo-overdue-text { color: #f66; border-bottom: 1px solid #ccc; }
+.todo-completed-text { color: #446600; border-bottom: 1px solid #ccc; }
+.todo-legend { text-align: center; color: #555; font-size: smaller; }
+
+.todo-simple-list .delete-link { width: 18px; background: url(http://cobweb.gfdl.noaa.gov/~aja/OMDT/pub/XToDo/XToDo-Delete-Inactive.png) no-repeat center center; }
+.todo-simple-list .delete-link:hover { background: url(http://cobweb.gfdl.noaa.gov/~aja/OMDT/pub/XToDo/XToDo-Delete-Active.png) no-repeat center center; }
+.todo-simple-list .delete-link a { color: #fff; }
+a.createlink { color: red; }
+#wikitext { line-height: 1.4em; }
+#wikitext sub, #wikitext sup { line-height: 0; }
+div.footnote { 
+    width: 160px; 
+    border-bottom: 1px solid blue;
+	margin-bottom: 0.5em;
+}
+p.footnote {
+	text-indent: -1em;
+	margin-right: 3em;
+	margin-left: 3em;
+	margin-top: 0px;
+	margin-bottom: 0.5em;
+	font-size: smaller;
+}
+p.qanda:first-letter {
+    float: left;
+    font-family: Old English, Georgia, serif;
+    color: #777777;
+    font-size: 250%;
+    line-height: 0.85em;
+    margin-right: 0.3em;
+    margin-bottom:-0.25em;
+}
+p.drop:first-letter {
+    float: left;
+    font-family: Old English, Georgia, serif;
+    font-size: 290%;
+    line-height: 0.85em;
+    margin-right: 0.1em;
+    margin-bottom:-0.25em;
+}
+del { color: red; }
+ins { background-color: yellow; }
+div.inote {
+    font-size: 10px;
+    line-height: 1.2em;
+    float: right;
+    padding: 2px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: 200px;
+    border-top: 1px dotted gray;
+    border-bottom: 1px dotted gray;
+    background-color: #ffffa1;
+}
+div.inote h1 {
+    background-color: #ffe53e;
+    font-size: 10px;
+    font-weight: normal;
+    margin-top: 0px;
+    padding-bottom: 1px;
+    margin-bottom: 3px;
+}
+div.inote h1 span.inote {
+    float: right;
+}
+div.inote ul, div.inote ol { margin-left: -1.5em; }
+div.inote p.vspace { margin-top:0.5em; }
+span.stickynote {
+    font-size: smaller;
+    float: right;
+    padding: 8px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: 175px;
+    border-top: 2px solid gray;
+    border-bottom: 2px solid gray;
+    text-align: center;
+    color: navy;
+    background-color: #dcdcdc;
+}
+span.smallcaps { font-variant: small-caps; }
+dfn  { font-style: normal; cursor: help; }
+abbr { font-style: italic; cursor: help; }
+abbr, dfn.definition { border-bottom: 1px dotted; }
+h5.runin { display: run-in; font-size: 100%; border: none; }
+div.figure {
+    border: thin silver solid;
+    padding: 0.3em;
+}
+div.figure p {
+    text-align: center;
+    font-style: italic;
+    font-size: smaller;
+    padding-top: 0.2em;
+    margin: 0;
+}
+dd, li p { margin-bottom: 0.5em }
+b.selflink { border-bottom: 1px dotted; }
+@media screen{ #wikitext b.selflink { color: #e66e31; } }
+
+p.question { margin-top: 2.0em; }
+p.question:first-letter {
+    float: left;
+    font-family: Old English, Georgia, serif;
+    color: #777777;
+    font-size: 200%;
+    line-height: 1.0em;
+    margin-right: 0.2em;
+}li.browse b { font-weight: normal; }
+div.breaklist { text-align: right; }
+div.breaklist strong { background-color: yellow; }
+div.breakpage { text-align: right; }
+table th.prompt { text-align: right; vertical-align: top; font-size: smaller; 
+	width:20%; color: #333333;
+}
+table td.note { font-size: smaller; color: #333333; padding-bottom:1.0em; }
+span.prompt { cursor: help; }
+table.wikilist { font-size: smaller; 
+    border: 1px solid #600;
+    border-collapse: collapse;
+}
+table.wikilist th { background-color: #eeeeee; padding: 2px; 
+    border: 1px dotted #600;
+}
+table.wikilist td { vertical-align: top; padding: 2px; 
+    border: 1px dotted #600;
+}
+.progress-bar {
+	display: block;
+	background: transparent; 
+	width: 160px;
+	font-size: 1px; /* for IE */
+	margin: 2px 0;
+}
+
+.progress-bar .pb1, .progress-bar .pb2, .progress-bar .pb3, .progress-bar .pb4 {
+	display: block; 
+	background: #fff; 
+	border-left:  1px solid #999; 
+	border-right: 1px solid #999;
+
+	overflow: hidden; 
+	height: 1px; 
+}
+.progress-bar .pb1 { margin: 0 4px; background: #999;}
+.progress-bar .pb2 { margin: 0 2px; border-width: 0 2px; }
+.progress-bar .pb3 { margin: 0 1px; }
+.progress-bar .pb4 { height: 11px; padding: 0 3px; }
+.progress-bar .pb5 { display: block; background: #eeeeef; overflow:hidden; }
+
+.progress-bar .bar {
+	display: block;
+	background: #a5bbd8;
+	height: 11px;
+	padding: 0;
+}
+
+  table.recipecheck tr.ok { color:black; background-color:#ccffcc; }
+  table.recipecheck tr.check { color:black; background-color:#ffffcc; }
+  table.recipecheck { border:1px solid #cccccc; padding:4px; }
+
+table.DQedit td.head {font-weight:bold;}
+
+table.DQedit span.required {color:red;}
+.editconflict { color:green; 
+  font-style:italic; margin-top:1.33em; margin-bottom:1.33em; }
+
+  table.markup { border:2px dotted #ccf; width:90%; }
+  td.markup1, td.markup2 { padding-left:10px; padding-right:10px; }
+  table.vert td.markup1 { border-bottom:1px solid #ccf; }
+  table.horiz td.markup1 { width:23em; border-right:1px solid #ccf; }
+  table.markup caption { text-align:left; }
+  div.faq p, div.faq pre { margin-left:2em; }
+  div.faq p.question { margin:1em 0 0.75em 0; font-weight:bold; }
+  div.faqtoc div.faq * { display:none; }
+  div.faqtoc div.faq p.question 
+    { display:block; font-weight:normal; margin:0.5em 0 0.5em 20px; line-height:normal; }
+  div.faqtoc div.faq p.question * { display:inline; }
+   
+    .frame 
+      { border:1px solid #cccccc; padding:4px; background-color:#f9f9f9; }
+    .lfloat { float:left; margin-right:0.5em; }
+    .rfloat { float:right; margin-left:0.5em; }
+a.varlink { text-decoration:none; }
+
+--></style>
+  <script> jsMath = {Controls: {cookie: {scale: 120}}} </script>
+  <script src="autoload.js"></script>
+
+  <link href='commentboxplus.css' rel='stylesheet' type='text/css' />  <meta name='robots' content='index,follow' />
+
+</head>
+<body>
+<div id="topcontent">
+<!--PageActionFmt-->
+<div id="pageactions">
+<b>Page actions: </b>
+<a rel="nofollow" href="QuickStartToDevelopmentOnGaeaWithoutFRE.html">View</a>&nbsp; 
+<a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=edit'>Edit</a>&nbsp; 
+<!-- <a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=attr'>Attributes</a>&nbsp; -->
+<a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=diff'>History</a>&nbsp; 
+<a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=upload'>Attach</a>&nbsp; 
+<a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=print' target='_blank'>Print</a>&nbsp; 
+<a href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=search&q=fmt=simple+link=GOLD.QuickStartToDevelopmentOnGaeaWithoutFRE'>Backlinks</a>&nbsp;
+<a href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/Site/Search'>Search</a>
+</div>
+</div>
+<div id="header">
+<!--PageHeaderFmt-->
+<a href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php'><img src='GOLDwiki.gif' alt='OMDTwiki' border='0' /></a>
+</div>
+<!--/PageHeaderFmt-->
+<div id="body">
+<!--PageTitleFmt-->
+<div id="pagetitle">
+<a href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD'>GOLD</a> / Quick Start to Development on Gaea Without FRE
+</div>
+<div id="pagetext">
+<br />
+<!--PageText-->
+<div id='wikitext'>
+<h1>Example checkout and build on Gaea</h1>
+<p>The following assumes you are using certificates to access the cvs repository. Your environment should look like this:
+</p><pre class='escaped'>CVS_RSH=gsissh
+CVSROOT=:ext:cvs.princeton.rdhpcs.noaa.gov:/home/fms/cvs</pre>
+<p class='vspace'>To install and build GOLD, cut and paste the following in to a shell on a gaea login node:
+</p><pre class='escaped'>
+
+mkdir -p extras
+cvs co -kk -r GOLD_ogrp -P GOLD
+cvs co -kk -r riga_201104 -P shared
+cvs co -kk -r fre-commands-arkansas-9 -P -d site fre/fre-commands/site
+cvs co -kk -r fre-commands-arkansas-9 -P -d bin bin-pub
+(cd extras; cvs co -kk -r riga_201104 -P -d GOLD_SIS atmos_null atmos_param/diag_integral atmos_param/monin_obukhov coupler ice_sis ice_param land_null)
+(cd extras; cvs up -r riga_201104 -P -d GOLD_SIS/ice_sis)
+(cd extras; cvs co -kk -r riga_201104 -P -d CM2G atmos_coupled atmos_fv_dynamics atmos_param atmos_shared coupler ice_param land_lad land_param)
+(cd extras/CM2G; ln -s ../GOLD_SIS/ice_sis .)
+rm -rf extras/CM2G/atmos_fv_dynamics/driver/solo
+
+module unload PrgEnv-pgi
+module unload PrgEnv-intel
+module load PrgEnv-pathscale
+module load netcdf/4.0.1.3
+set compiler = pathscale
+
+mkdir -p build
+(cd build; mkdir -p shared solo GOLD_SIS CM2G debug.solo debug.GOLD_SIS  debug.CM2G solo.symmetric)
+
+cd build/shared
+rm path_names
+../../bin/list_paths ../../shared/
+mv path_names pt_orig
+egrep -v "atmos_ocean_fluxes|coupler_types|coupler_util" pt_orig &gt; path_names
+../../bin/mkmf -t ../../site/ncrc/$compiler.mk -p libfms.a -c "-Duse_libMPI -Duse_netCDF" path_names
+make NETCDF=4 REPRO=1 -j 6
+
+cd ../solo
+ln -sf ../shared/*.{o,mod} .
+rm path_names
+../../bin/list_paths ../../GOLD/config_src/dynamic/ ../../GOLD/config_src/solo_driver/ ../../GOLD/src/ ../../shared/
+../../bin/mkmf -t ../../site/ncrc/$compiler.mk -p GOLD -c "-Duse_libMPI -Duse_netCDF" path_names
+make NETCDF=4 REPRO=1 -j 6
+
+cd ../GOLD_SIS
+ln -sf ../shared/*.{o,mod} .
+rm path_names
+../../bin/list_paths ../../GOLD/config_src/dynamic/ ../../GOLD/config_src/coupled_driver/ ../../GOLD/{examples/GOLD_SIS/,src/} ../../shared/ ../../extras/GOLD_SIS/
+../../bin/mkmf -t ../../site/ncrc/$compiler.mk -p GOLD -c "-Duse_libMPI -Duse_netCDF" path_names
+make NETCDF=4 REPRO=1 -j 6
+
+cd ../CM2G
+ln -sf ../shared/*.{o,mod} .
+rm path_names
+../../bin/list_paths ../../GOLD/config_src/dynamic/ ../../GOLD/config_src/coupled_driver/ ../../GOLD/src/ ../../shared/ ../../extras/CM2G/*/
+../../bin/mkmf -t ../../site/ncrc/$compiler.mk -p GOLD -c "-Duse_libMPI -Duse_netCDF -DSPMD -DLAND_BND_TRACERS" path_names
+make NETCDF=4 REPRO=1 -j 6
+
+cd ../.. </pre>
+<p class='vspace'>To run any of the configurations, you need to login access the batch nodes either interactively
+</p><pre class='escaped'>msub -I -l size=24 -l walltime=02:00:00
+</pre>
+<p>or via a batch job script. Note that size=24 is the minimum and cores come in multiples of 24.
+</p>
+<p class='vspace'>To run double_gyre:
+</p><pre class='escaped'>cd GOLD/examples/double_gyre
+aprun -n 8 ../../../build/solo/GOLD</pre>
+<p class='vspace'>To run DOME:
+</p><pre class='escaped'>cd GOLD/examples/DOME
+aprun -n 6 ../../../build/solo/GOLD</pre>
+<p class='vspace'>To run global:
+</p><pre class='escaped'>cd GOLD/examples/global
+ln -sf /archive/gold/datasets/global/omsk/INPUT .
+aprun -n 36 ../../../build/solo/GOLD</pre>
+<p class='vspace'>To run GOLD_SIS:
+</p><pre class='escaped'>cd GOLD/examples/GOLD_SIS
+mkdir -p INPUT
+(cd INPUT; ln -sf /archive/gold/datasets/GOLD_SIS/omsk_2007_10/INPUT/* .)
+mkdir -p RESTART; rm -f *.nc* RESTART/*
+aprun -n 30 ../../../build/GOLD_SIS/GOLD</pre>
+<p class='vspace'>To run <a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/CM2G'>CM2G</a>:
+</p><pre class='escaped'>cd GOLD/examples/CM2G
+mkdir INPUT RESTART
+(cd INPUT; ln -sf /archive/gold/datasets/CM2G/perth/INPUT/* .)
+(cd INPUT; ln -sf /archive/gold/datasets/CM2G/perth/mosaic.mica.unpacked/* .)
+(cd INPUT; ln -sf /archive/gold/datasets/CM2G/perth/RESTART/CM2G.initCond_2008.06.04.unpacked/* .)
+aprun -n 120 ../../../build/CM2G/GOLD</pre>
+<p class='vspace'>To run CM2G63L:
+</p><pre class='escaped'>cd GOLD/examples/CM2G63L
+mkdir INPUT RESTART
+(cd INPUT; ln -sf /archive/gold/datasets/CM2G/perth/INPUT/* .)
+(cd INPUT; ln -sf /archive/gold/datasets/CM2G/perth/mosaic.mica2.unpacked/* .)
+(cd INPUT; ln -sf /archive/gold/datasets/CM2G/perth/RESTART/CM2G.initCond_2008.06.04.unpacked/* .)
+aprun -n 120 ../../../build/CM2G/GOLD</pre>
+<p class='vspace'>The resulting directory structure for example 5 is:
+</p><span class='frame rfloat' style='width: 10pc;'> The top level directory, in this example &ldquo;.&rdquo;, is the top of your work space. </span><pre class='escaped'>.
+|-- GOLD
+|   |-- config_src
+|   |   |-- coupled_driver
+|   |   |-- dynamic
+|   |   `-- solo_driver
+|   |-- examples
+|   |   |-- CM2G
+|   |   |-- CM2G63L
+|   |   |-- DOME
+|   |   |-- GOLD_SIS
+|   |   |-- benchmark
+|   |   |-- double_gyre
+|   |   `-- global
+|   `-- src
+|       |-- core
+|       |-- diagnostics
+|       |-- equation_of_state
+|       |-- framework
+|       |-- initialization
+|       |-- parameterizations
+|       |   |-- lateral
+|       |   `-- vertical
+|       |-- tracer
+|       `-- user
+|-- bin
+|-- build
+|   |-- CM2G
+|   |-- GOLD_SIS
+|   |-- shared
+|   `-- solo
+|-- extras
+|   |-- CM2G
+|   |   |-- atmos_coupled
+|   |   |   ...
+|   |    `-- land_param
+|   `-- GOLD_SIS
+|       |-- atmos_null
+|       |   ...
+|       `-- land_null
+|-- shared
+`-- templates</pre>
+<hr />
+<h2>Comments</h2>
+
+    <div id='message'><form name='cbox' class='inputform' action='QuickStartToDevelopmentOnGaeaWithoutFRE.html' method='post' onsubmit='return checkform(this);'>
+    <input type='hidden' name='n' value='GOLD.QuickStartToDevelopmentOnGaeaWithoutFRE' />
+    <input type='hidden' name='action' value='comment' />
+    <input type='hidden' name='order' value='chrono' /><input type='hidden' name='accesscode' value='262' />
+    <input type='hidden' name='csum' value='Comment added' />
+    <table width='90%'><tr>
+    <th class='prompt' align='right' valign='top'>Add Comment&nbsp;</th>
+    <td><textarea class='inputtext commenttext' name='text' id='text' rows=6 cols=40></textarea>
+    </td></tr><tr><th class='prompt' align='right' valign='top'>Sign as Author&nbsp;</th>
+    <td><input class='inputbox commentauthorbox' type='text' name='author' value='' size='32' /><input type='hidden' name='access' value='262' /><input class='inputbutton commentbutton' type='submit' name='post' value=' Post ' />
+    <input class='inputbutton commentbutton' type='reset' value='Reset' /></td></tr></table><br /></form></div>
+ <script type='text/javascript' language='JavaScript1.2'>
+  function checkform ( form ) {
+   if (form.text && form.text.value == "") { window.alert( 'Please enter a comment to post' ); form.text.focus(); return false; }
+   if (form.author && form.author.value == "") { window.alert( 'Please enter your name as author' ); form.author.focus(); return false; }return true ;
+  }
+  </script>
+   
+</div>
+
+<div id="footer">
+<a rel="nofollow" href="QuickStartToDevelopmentOnGaeaWithoutFRE.html">View</a>&nbsp; 
+<a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=edit'>Edit</a>&nbsp; 
+<a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=diff'>History</a>&nbsp; 
+<a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=upload'>Attach</a>&nbsp; 
+<a rel="nofollow" href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/QuickStartToDevelopmentOnGaeaWithoutFRE?action=print' target='_blank'>Print</a>&nbsp; 
+<a href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/Site/Search'>Search</a>
+&nbsp; &nbsp; 
+Page last modified on October 28, 2011, at 10:54 AM
+</div>
+</div>
+<!--PageLeftFmt-->
+<div id="menu">
+<b>Navigation</b>
+<hr />
+<p class='vspace sidehead'> Wikis and homepages
+</p><ul><li><a class='urllink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/' title='' rel='nofollow'>O Group</a>&rsquo;s list of wikis
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/OMDT/OMDT'>OMDT</a>
+</li><li><a class='urllink' href='http://www.gfdl.noaa.gov/fms/pubrel/o/mom4p1/src/mom4p1/doc/mom4_manual.html' title='' rel='nofollow'>MOM4p1</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/GOLD'>GOLD</a>
+</li><li><a class='urllink' href='http://cobweb.gfdl.noaa.gov/~atw/cmdt_wiki/index.php/CMDT' title='' rel='nofollow'>CMDT</a>
+</li></ul><p class='vspace sidehead'> Gold pages
+</p><ul><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/DevelopmentProjects' title="Development projects">Projects</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/GOLD/IssueTracking' title="GOLD Issue Tracking System (or GITS  http://cobweb.gfdl.noaa.gov/~aja/GOLD/pub/smilingwink.gif&amp;quot;Winkey&amp;quot;  )">GITS</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/Runs/HomePage' title="CM2G">Runs</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/Site/AllRecentChanges'>Site-wide recent changes</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/Site/AllRecentChanges?action=rss'>Subscribe to RSS feed</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/Main/WikiSandbox'>WikiSandbox</a>
+</li></ul><hr />
+<p class='vspace sidehead'> PmWiki local documentation
+</p><ul><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/PmWiki'>PmWiki</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/InitialSetupTasks'>Initial Setup Tasks</a>  
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/BasicEditing'>Basic Editing</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/DocumentationIndex'>Documentation Index</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/FAQ'>PmWiki FAQ</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/PmWikiPhilosophy'>PmWikiPhilosophy</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/ReleaseNotes'>Release Notes</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/ChangeLog'>ChangeLog</a>
+</li></ul><p class='sidehead'> pmWiki
+</p><ul><li><a class='urllink' href='http://www.pmwiki.org' title='' rel='nofollow'>pmwiki.org</a>
+</li><li><a class='urllink' href='http://www.pmwiki.org/wiki/Cookbook/CookbookBasics' title='' rel='nofollow'>Cookbook (addons)</a>
+</li><li><a class='urllink' href='http://www.pmwiki.org/wiki/Cookbook/Skins' title='' rel='nofollow'>Skins (themes)</a>
+</li><li><a class='urllink' href='http://www.pmwiki.org/PITS/PITS' title='' rel='nofollow'>PITS (issue tracking)</a>
+</li><li><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/PmWiki/MailingLists'>Mailing Lists</a>
+</li></ul><p class='vspace'  style='text-align: right;'> <span style='font-size:83%'><a class='wikilink' href='http://cobweb.gfdl.noaa.gov/~aja/OMDT/index.php/Site/SideBar?action=edit'>edit SideBar</a></span>
+</p>
+
+<!--/PageLeftFmt-->
+</div>
+</div>
+<!--PageFooterFmt-->
+<!--HTMLFooter-->
+  <script>
+    jsMath.Autoload.Check();
+    jsMath.Process(document);
+  </script>
+
+</body>
+</html>

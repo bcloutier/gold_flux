@@ -1,0 +1,18 @@
+# gridname, fieldname_code,          fieldname_file, file_name,         ongrid, factor
+"OCN" , "lw_flux"        , "netlwdn_sfc", "./EXP/forcing.nc", .true.,  1.0
+"OCN" , "sw_flux_vis_dir", "netswdn_sfc", "./EXP/forcing.nc", .true.,  0.285
+"OCN" , "sw_flux_vis_dif", "netswdn_sfc", "./EXP/forcing.nc", .true.,  0.285
+"OCN" , "sw_flux_nir_dir", "netswdn_sfc", "./EXP/forcing.nc", .true.,  0.215
+"OCN" , "sw_flux_nir_dif", "netswdn_sfc", "./EXP/forcing.nc", .true.,  0.215
+"OCN" , "lprec"          , "precip"     , "./EXP/forcing.nc", .true.,  1.0
+"OCN" , "q_flux"         , "evap"       , "./EXP/forcing.nc", .true.,  1.0
+"OCN" , "u_flux"         , "STRESS_X"   , "./EXP/forcing.nc", .true.,  1.0
+"OCN" , "v_flux"         , "STRESS_Y"   , "./EXP/forcing.nc", .true.,  1.0
+"OCN" , "fprec"          , "snow"       , "./EXP/forcing.nc", .true.,  1.0
+"OCN" , "runoff"         , ""           , ""                , .true.,  0.0
+"OCN" , "calving"        , ""           , ""                , .true.,  0.0
+"OCN" , "dhdt"           , ""           , ""                , .true., 40.0
+"OCN" , "dedt"           , ""           , ""                , .true.,  2.0e-6
+"OCN" , "drdt"           , ""           , ""                , .true., 10.0
+
+
